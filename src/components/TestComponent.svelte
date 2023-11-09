@@ -11,21 +11,35 @@
 
     getPlayerInfo(); 
 
+    const dataLinearScale = d3.scaleLinear()
+        .domain([0, 100])
+        .range([0, 400])
+
+    const dataColorLinearScale = d3.scaleLinear()
+        .domain([0, 100])
+        .range(['yellow', 'red'])
+
+    let axis = d3.axisBottom(dataLinearScale)
+
+    d3.select('#bottomAxis')
+        .call(axis)
+
     let data = [30, 40, 10, 20, 60];
 
     d3.select('#barChart')
         .selectAll('rect')
         .data(data)
         .join('rect')
-        .attr('x', (d,i) => (i*60))
-        .attr('width', 50)
-        .attr('y', (d) => (300 - d*5))
-        .attr('height', (d) => (d*5))
-        .text('h');
+        .attr('y', (d,i) => (i*60))
+        .attr('height', 50)
+        .attr('width', d => dataLinearScale(d))
+        .attr('fill', d => dataColorLinearScale(d))
     })
 </script>
 
 <h1>Test</h1>
 <p>Hello Hello</p>
 
-<svg id='barChart' width=500 height=500></svg>
+<svg id='barChart' width=500 height=500>
+    <g id='bottomAxis' transform='translate(0, 300)'></g>
+</svg>
