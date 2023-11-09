@@ -3,28 +3,21 @@
     import * as d3 from 'd3';
 
     onMount(async () => {
-        const getPlayerInfo = async () => {
-        const res = await fetch('https://api.wiseoldman.net/v2/players/gloopt');
-        const data = await res.json();
-        console.log(data);
-    }
 
-    getPlayerInfo(); 
+    let data = [30, 40, 10, 20, 60];
 
     const dataLinearScale = d3.scaleLinear()
-        .domain([0, 100])
+        .domain([0, 99])
         .range([0, 400])
 
     const dataColorLinearScale = d3.scaleLinear()
-        .domain([0, 100])
+        .domain([0, 99])
         .range(['yellow', 'red'])
 
     let axis = d3.axisBottom(dataLinearScale)
 
     d3.select('#bottomAxis')
         .call(axis)
-
-    let data = [30, 40, 10, 20, 60];
 
     d3.select('#barChart')
         .selectAll('rect')

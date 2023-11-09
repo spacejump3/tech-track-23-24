@@ -1,10 +1,12 @@
 <script>
     import TestComponent from "../components/TestComponent.svelte";
+    import Barchart from "../components/Barchart.svelte";
 </script>
 
 <body>
     <main>
-        <TestComponent />
+        <Barchart />
+        <!-- <TestComponent /> -->
     </main>
 </body>
 
