@@ -3,9 +3,34 @@
     import * as d3 from 'd3';
 
     onMount(async () => {
-        d3.json('https://api.wiseoldman.net/v2/players/gloopt').then((d) => {
-                console.log(d);
-            });
+
+        // function getData() {
+        //     fetch('https://api.wiseoldman.net/v2/players/gloopt')
+        //         .then(res => res.json())
+        //         .then(data => {
+        //             console.log(data);
+        //             return data;
+        //         })  
+        // };
+
+        // const playerData = getData();
+
+        // playerData.last.skills
+        let data;
+
+        async function getData() {
+            const response = await fetch('https://api.wiseoldman.net/v2/players/gloopt');
+            data = await response.json();
+            return data
+        };
+
+        getData().then(data => {
+            console.log(data.latestSnapshot.data.skills); // returns skills object
+            console.log(Object.keys(data.latestSnapshot.data.skills)); // returns array of skills
+
+            
+        });
+
     });
 </script>
 

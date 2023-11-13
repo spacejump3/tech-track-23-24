@@ -6,7 +6,7 @@
 <body>
     <main>
         <Barchart />
-        <!-- <TestComponent /> -->
+        <TestComponent />
     </main>
 </body>
 
