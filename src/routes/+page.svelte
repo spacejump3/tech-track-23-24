@@ -6,7 +6,7 @@
 <body>
     <main>
         <Barchart />
-        <TestComponent />
+        <!-- <TestComponent /> -->
     </main>
 </body>
 
@@ -20,7 +20,7 @@
     main {
         margin: 0;
         padding: .1em;
-        text-align: center;
+        /* text-align: center; */
         font-family: 'Courier New', Courier, monospace;
     }
 </style>

@@ -4,38 +4,51 @@
 
     onMount(async () => {
 
-        // function getData() {
-        //     fetch('https://api.wiseoldman.net/v2/players/gloopt')
-        //         .then(res => res.json())
-        //         .then(data => {
-        //             console.log(data);
-        //             return data;
-        //         })  
-        // };
-
-        // const playerData = getData();
-
-        // playerData.last.skills
         let data;
+        let skillData;
 
         async function getData() {
             const response = await fetch('https://api.wiseoldman.net/v2/players/gloopt');
             data = await response.json();
-            return data
+
+            skillData = Object.values(data.latestSnapshot.data.skills); // Returns array of skills
+            return data;
         };
 
-        getData().then(data => {
-            console.log(data.latestSnapshot.data.skills); // returns skills object
-            console.log(Object.keys(data.latestSnapshot.data.skills)); // returns array of skills
+        await getData(); // Wait for the getData() function to complete
 
-            
-        });
+        skillData.shift() // Remove the first datapoint
+
+        console.log(skillData);
+
+        // D3 barchart below
+        const xScale = d3.scaleLinear()
+            .domain([1, 99])
+            .range([1, 500]);
+
+        const yScale = d3.scaleBand()
+            .domain(skillData.map(d => d.metric))
+            .range([0, 800])
+            .padding(0.1);
+
+        const colorScale = d3.scaleLinear()
+            .domain([0, 99])
+            .range(['black', 'green'])
+
+        d3.select('#skillBarChart').selectAll('rect')
+            .data(skillData)
+            .join('rect')
+
+            .attr('width', d => xScale(d.level))
+            .attr('height', yScale.bandwidth())
+            .attr('y', d => yScale(d.metric))
+        
+            .attr('fill', d => colorScale(d.level));
+
 
     });
 </script>
 
-<h2>eindopdracht component</h2>
+<h2>Eindopdracht component</h2>
 
-<svg width=1000>
-    <g class='chart'></g>
-</svg>
+<svg id="skillBarChart" width='500' height='800'></svg>
