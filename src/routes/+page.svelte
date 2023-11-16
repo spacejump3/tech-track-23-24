@@ -4,23 +4,21 @@
 </script>
 
 <body>
-    <main>
         <Barchart />
         <!-- <TestComponent /> -->
-    </main>
 </body>
 
 <style>
     body {
         margin: 0;
         padding: 0;
-        background: yellow;
-    }
+        background: #2D2421;
 
-    main {
+        color: white;
         margin: 0;
         padding: .1em;
         /* text-align: center; */
         font-family: 'Courier New', Courier, monospace;
+        display: flex;
     }
 </style>

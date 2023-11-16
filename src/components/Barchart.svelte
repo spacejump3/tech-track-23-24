@@ -1,54 +1,134 @@
 <script>
-    import { onMount } from 'svelte';
     import * as d3 from 'd3';
+    import { onMount } from 'svelte';
+    
+    let formData = { name: 'gloopt' };
 
-    onMount(async () => {
+    async function getData(name) { // API fetch
+      const response = await fetch(
+        `https://api.wiseoldman.net/v2/players/${name}`
+      );
+      return await response.json();
+    }
+  
+    async function handleSubmit() { // Fetch data on button press 
+      let data;
+      let skillData;
 
-        let data;
-        let skillData;
+      data = await getData(formData.name);
+      skillData = Object.values(data.latestSnapshot.data.skills);
 
-        async function getData() {
-            const response = await fetch('https://api.wiseoldman.net/v2/players/gloopt');
-            data = await response.json();
+      skillData.shift(); // Remove the first datapoint
 
-            skillData = Object.values(data.latestSnapshot.data.skills); // Returns array of skills
-            return data;
-        };
+      console.log(skillData)
 
-        await getData(); // Wait for the getData() function to complete
+      generateChart(skillData);
+    };
 
-        skillData.shift() // Remove the first datapoint
+    function generateChart(skillData) {
+      const width = 800, height = 300;
+      const margin = { top: 30, right: 30, bottom: 30, left: 30 };
 
-        console.log(skillData);
+      const svg = d3.select('svg')
+        .attr('width', width)
+        .attr('height', height);
 
-        // D3 barchart below
-        const xScale = d3.scaleLinear()
-            .domain([1, 99])
-            .range([1, 500]);
+      const xScale = d3.scaleBand()
+        .domain([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22])
+        .range([0, width - (margin.left + margin.right)]);
 
-        const yScale = d3.scaleBand()
-            .domain(skillData.map(d => d.metric))
-            .range([0, 800])
-            .padding(0.1);
+      const yScale = d3.scaleLinear()
+        .domain([1, 99])
+        .range([height - (margin.top + margin.bottom) * 2, 0]);
 
-        const colorScale = d3.scaleLinear()
-            .domain([0, 99])
-            .range(['black', 'green'])
+      svg.append('g')
+        .attr('transform', 'translate('+ margin.top + ',' + margin.left +')')
+        .selectAll('rect')
+        .data(skillData)
+        .enter()
+        .append('rect')
+          .attr('x', function(d, i) {
+            return xScale(i);
+          })
+          .attr('y', function(d, i) {
+            return yScale(d.level);
+          })
+          .attr('width', xScale.bandwidth())
+          .attr('height', function(d, i) { 
+            return height - (margin.top + margin.bottom) - yScale(d.level); 
+          })
+          .attr('fill', 'lightblue')
+          .style('stroke', 'black')
+          .style('stroke-width', 1);
 
-        d3.select('#skillBarChart').selectAll('rect')
-            .data(skillData)
-            .join('rect')
+      svg.append('g')
+        .attr('transform', 'translate('+ margin.left +','+ (height - margin.top) +')')
+        .call(d3.axisBottom(xScale)); 
 
-            .attr('width', d => xScale(d.level))
-            .attr('height', yScale.bandwidth())
-            .attr('y', d => yScale(d.metric))
-        
-            .attr('fill', d => colorScale(d.level));
+      svg.append('g')
+        .attr('transform', 'translate('+ margin.left +','+ margin.top +')')
+        .call(d3.axisLeft(yScale));
+    }
 
+  </script>
 
-    });
-</script>
+<div class='formContainer'>
+    <form on:submit={handleSubmit}>
+        <label for='name'>Enter username</label>
+        <input type='text' placeholder='First username...' id='name' bind:value={formData.name} />
+        <input type='text' placeholder='Second username...' />
+        <button type='submit'>Compare</button>
+    </form>
+</div>
 
-<h2>Eindopdracht component</h2>
+<!-- <svg id='skillBarChart' width=500 height=500>
+  <g id='bottomAxis' transform='translate(0, 300)'></g>
+</svg> -->
 
-<svg id="skillBarChart" width='500' height='800'></svg>
+<svg></svg>
+
+<style>
+    form {
+        margin: 1em;
+        padding: 1em;
+
+        display: flex;
+        flex-direction: column;
+    }
+
+    form label {
+        color: yellow;
+        font-weight: 600;
+    }
+
+    form input {
+        height: 3em;
+        margin: 1em 0 0 0;
+        padding: 0 1em 0 1em;
+
+        background: #1E0F0F;
+        color: white;
+        border: none;
+        border-radius: .1em;
+    }
+
+    form input:focus {
+        outline: solid #554844 1px;
+    }
+
+    form button {
+        height: 3em;
+        margin: 1em 0 0 0;
+        color: white;
+        font-weight: 600;
+
+        background: #3A961A;
+        border: none;
+        border-radius: .1em;
+    }
+
+    form button:hover {
+        background: #53bf30;
+        cursor: pointer;
+    }
+</style>
