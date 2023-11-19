@@ -4,71 +4,73 @@
     
     let formData = { name: 'gloopt' };
 
-    async function getData(name) { // API fetch
+    // Fetch API data
+    async function getData(name) {
       const response = await fetch(
         `https://api.wiseoldman.net/v2/players/${name}`
       );
       return await response.json();
-    }
+    };
   
-    async function handleSubmit() { // Fetch data on button press 
-      let data;
-      let skillData;
-
-      data = await getData(formData.name);
-      skillData = Object.values(data.latestSnapshot.data.skills);
+    // Fetch data on button press
+    async function handleSubmit() {  
+      let data = await getData(formData.name);
+      let skillData = Object.values(data.latestSnapshot.data.skills);
 
       skillData.shift(); // Remove the first datapoint
 
-      console.log(skillData)
+      console.log(skillData);
 
       generateChart(skillData);
     };
 
+    // D3 barchart
     function generateChart(skillData) {
-      const width = 800, height = 300;
-      const margin = { top: 30, right: 30, bottom: 30, left: 30 };
+        const width = 800, height = 300;
+        const margin = { top: 30, right: 30, bottom: 30, left: 30 };
 
-      const svg = d3.select('svg')
+        const svg = d3.select('svg')
         .attr('width', width)
         .attr('height', height);
 
-      const xScale = d3.scaleBand()
-        .domain([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22])
+        svg.selectAll('*').remove(); // remove the previous chart before creating a new chart
+
+        const xScale = d3.scaleBand()
+        .domain(['attack', 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22])
         .range([0, width - (margin.left + margin.right)]);
 
-      const yScale = d3.scaleLinear()
+        const yScale = d3.scaleLinear()
         .domain([1, 99])
         .range([height - (margin.top + margin.bottom) * 2, 0]);
 
-      svg.append('g')
+        svg.append('g')
         .attr('transform', 'translate('+ margin.top + ',' + margin.left +')')
         .selectAll('rect')
         .data(skillData)
         .enter()
         .append('rect')
-          .attr('x', function(d, i) {
+            .attr('x', function(d, i) {
             return xScale(i);
-          })
-          .attr('y', function(d, i) {
+            })
+            .attr('y', function(d, i) {
             return yScale(d.level);
-          })
-          .attr('width', xScale.bandwidth())
-          .attr('height', function(d, i) { 
+            })
+            .attr('width', xScale.bandwidth())
+            .attr('height', function(d, i) { 
             return height - (margin.top + margin.bottom) - yScale(d.level); 
-          })
-          .attr('fill', 'lightblue')
-          .style('stroke', 'black')
-          .style('stroke-width', 1);
+            })
+            .attr('fill', 'brown')
+            .style('stroke', 'black')
+            .style('stroke-width', 1);
 
-      svg.append('g')
+        svg.append('g')
         .attr('transform', 'translate('+ margin.left +','+ (height - margin.top) +')')
         .call(d3.axisBottom(xScale)); 
 
-      svg.append('g')
+        svg.append('g')
         .attr('transform', 'translate('+ margin.left +','+ margin.top +')')
         .call(d3.axisLeft(yScale));
-    }
+    };
 
   </script>
 
@@ -80,10 +82,6 @@
         <button type='submit'>Compare</button>
     </form>
 </div>
-
-<!-- <svg id='skillBarChart' width=500 height=500>
-  <g id='bottomAxis' transform='translate(0, 300)'></g>
-</svg> -->
 
 <svg></svg>
 
