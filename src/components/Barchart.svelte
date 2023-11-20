@@ -24,54 +24,132 @@
       generateChart(skillData);
     };
 
-    // D3 barchart
+    // D3 charts
     function generateChart(skillData) {
-        const width = 800, height = 300;
-        const margin = { top: 30, right: 30, bottom: 30, left: 30 };
+        // Barchart
+        const nodes = skillData.map((skill, index) => ({ id: index, skill: skill.level }));
 
-        const svg = d3.select('svg')
-        .attr('width', width)
-        .attr('height', height);
+        const links = skillData.slice(0, -1).map((_, index) => ({ source: index, target: index + 1 }));
 
-        svg.selectAll('*').remove(); // remove the previous chart before creating a new chart
+        const simulation = d3.forceSimulation(nodes)
+            .force('link', d3.forceLink(links).id(d => d.id).distance(50))
+            .force("charge", d3.forceManyBody().strength(-10))
+            .force("center", d3.forceCenter(300, 200));
 
-        const xScale = d3.scaleBand()
-        .domain(['attack', 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22])
-        .range([0, width - (margin.left + margin.right)]);
+        const svg = d3.select("svg");
 
-        const yScale = d3.scaleLinear()
-        .domain([1, 99])
-        .range([height - (margin.top + margin.bottom) * 2, 0]);
+        const link = svg.selectAll("line")
+            .data(links)
+            .enter().append("line")
+            .attr('stroke', 'white');
 
-        svg.append('g')
-        .attr('transform', 'translate('+ margin.top + ',' + margin.left +')')
-        .selectAll('rect')
-        .data(skillData)
-        .enter()
-        .append('rect')
-            .attr('x', function(d, i) {
-            return xScale(i);
-            })
-            .attr('y', function(d, i) {
-            return yScale(d.level);
-            })
-            .attr('width', xScale.bandwidth())
-            .attr('height', function(d, i) { 
-            return height - (margin.top + margin.bottom) - yScale(d.level); 
-            })
-            .attr('fill', 'brown')
-            .style('stroke', 'black')
-            .style('stroke-width', 1);
+        const node = svg.selectAll("circle")
+            .data(nodes)
+            .enter().append("circle")
+            .attr("r", 10)
+            .call(d3.drag()
+                .on("start", (event, d) => dragstarted(event, d))
+                .on("drag", (event, d) => dragged(event, d))
+                .on("end", (event, d) => dragended(event, d)));
 
-        svg.append('g')
-        .attr('transform', 'translate('+ margin.left +','+ (height - margin.top) +')')
-        .call(d3.axisBottom(xScale)); 
+        simulation.on("tick", function () {
+            link.attr("x1", d => d.source.x)
+                .attr("y1", d => d.source.y)
+                .attr("x2", d => d.target.x)
+                .attr("y2", d => d.target.y);
 
-        svg.append('g')
-        .attr('transform', 'translate('+ margin.left +','+ margin.top +')')
-        .call(d3.axisLeft(yScale));
+            node.attr("cx", d => d.x)
+                .attr("cy", d => d.y);
+        });
+
+        function dragstarted(event, d) {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            d.fx = d.x;
+            d.fy = d.y;
+        }
+
+        function dragged(event, d) {
+            d.fx = event.x;
+            d.fy = event.y;
+        }
+
+        function dragended(event, d) {
+            if (!event.active) simulation.alphaTarget(0);
+            d.fx = null;
+            d.fy = null;
+        }
+
+        simulation.restart()
+
+
+        // const width = 500, height = 500;
+        // const svg = d3.select('#bubbleChart')
+
+        // const links = [
+        //         {source: '0', target: '18'},
+        //         {source: '1', target: '18'},
+        //         {source: '2', target: '18'},
+        //         {source: '3', target: '1'},
+        //         {source: '4', target: '1'},
+        //         {source: '5', target: '1'},
+        //         {source: '6', target: '1'},
+        //         {source: '7', target: '1'},
+        //         {source: '8', target: '1'},
+        //         {source: '9', target: '1'},
+        //         {source: '10', target: '1'},
+        //         {source: '11', target: '1'},
+        //         {source: '12', target: '1'},
+        //         {source: '13', target: '1'},
+        //         {source: '14', target: '1'},
+        //         {source: '15', target: '1'},
+        //         {source: '16', target: '1'},
+        //         {source: '17', target: '1'},
+        //         {source: '18', target: '1'},
+        //         {source: '19', target: '1'},
+        //         {source: '20', target: '1'},
+        //         {source: '21', target: '1'},
+        //         {source: '22', target: '1'}
+        //     ]
+        
+        // const node = svg
+        //     .append('g')
+        //     .selectAll('circle')
+        //     .data(skillData)
+        //     .enter()
+        //     .append('circle')
+
+        // const link = svg
+        //     .append('g')
+        //     .selectAll('line')
+        //     .data(chart.links)
+        //     .enter()
+        //     .append('line')
+        //     .attr('stroke-width', function(d) {
+        //         return 3;
+        //     })
+        //     .style('stroke', 'pink')
+
+        // const simulation = d3.forceSimulation(skillData)
+        //     .force('charge', d3.forceManyBody().strength(-10))
+        //     .force('center', d3.forceCenter(width / 2, height / 2))
+        //     .on('tick', ticked);
+
+        // function ticked() {
+        //     node
+        //         .join('circle')
+        //         .attr('r', function(d) { 
+        //             return .3 * d.level; 
+        //         })
+        //         .attr('cx', function(d) {
+        //             return d.x
+        //         })
+        //         .attr('cy', function(d) {
+        //             return d.y
+        //         })
+        //         .attr('fill', '#0005')
+        //         .attr('stroke', 'grey')
+        // };
     };
-
   </script>
 
 <div class='formContainer'>
@@ -83,7 +161,7 @@
     </form>
 </div>
 
-<svg></svg>
+<svg id='bubbleChart' width='1000' height='1000'></svg>
 
 <style>
     form {
