@@ -26,14 +26,30 @@
 
     // D3 charts
     function generateChart(skillData) {
-        // Barchart
-        const nodes = skillData.map((skill, index) => ({ id: index, skill: skill.level }));
+        const attackLinks = [
+            { source: 0, target: 1 },
+            { source: 0, target: 2 },
+            { source: 0, target: 3 },
+            { source: 3, target: 4 },
+            { source: 4, target: 5 },
+            { source: 3, target: 6 },
+            { source: 3, target: 7 },
+            { source: 3, target: 8 },
+            { source: 4, target: 9 },
+            { source: 3, target: 10 },
+            { source: 0, target: 11 },
+            { source: 0, target: 12 }
+        ];
 
-        const links = skillData.slice(0, -1).map((_, index) => ({ source: index, target: index + 1 }));
+        const nodes = skillData.map((skill, index, metric, rank) => ({ id: index, level: skill.level, metric: skill.metric, rank: skill.rank }));
+
+        const links = attackLinks
+
+        console.log(nodes);
 
         const simulation = d3.forceSimulation(nodes)
-            .force('link', d3.forceLink(links).id(d => d.id).distance(50))
-            .force("charge", d3.forceManyBody().strength(-10))
+            .force('link', d3.forceLink(links).id(d => d.id).distance(100))
+            .force("charge", d3.forceManyBody().strength(-30))
             .force("center", d3.forceCenter(300, 200));
 
         const svg = d3.select("svg");
@@ -46,7 +62,8 @@
         const node = svg.selectAll("circle")
             .data(nodes)
             .enter().append("circle")
-            .attr("r", 10)
+            .attr('r', (d) => d.level * .3)
+            .attr('fill', 'red')
             .call(d3.drag()
                 .on("start", (event, d) => dragstarted(event, d))
                 .on("drag", (event, d) => dragged(event, d))
@@ -66,21 +83,20 @@
             if (!event.active) simulation.alphaTarget(0.3).restart();
             d.fx = d.x;
             d.fy = d.y;
-        }
+        };
 
         function dragged(event, d) {
             d.fx = event.x;
             d.fy = event.y;
-        }
+        };
 
         function dragended(event, d) {
             if (!event.active) simulation.alphaTarget(0);
             d.fx = null;
             d.fy = null;
-        }
+        };
 
-        simulation.restart()
-
+        simulation.restart();
 
         // const width = 500, height = 500;
         // const svg = d3.select('#bubbleChart')
