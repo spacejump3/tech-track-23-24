@@ -19,6 +19,12 @@
 
       skillData.shift(); // Remove the first datapoint
 
+      // add imagePath to each node
+      skillData = skillData.map((d, i) => ({
+        ...d,
+        imagePath: `/static/img/${i}.png`
+      }))
+
       console.log(skillData);
 
       generateChart(skillData);
@@ -38,10 +44,27 @@
             { source: 4, target: 9 },
             { source: 3, target: 10 },
             { source: 0, target: 11 },
-            { source: 0, target: 12 }
+            { source: 0, target: 12 },
+            { source: 0, target: 13 },
+            { source: 0, target: 14 },
+            { source: 0, target: 15 },
+            { source: 0, target: 16 },
+            { source: 0, target: 17 },
+            { source: 0, target: 18 },
+            { source: 0, target: 19 },
+            { source: 0, target: 20 },
+            { source: 0, target: 21 },
+            { source: 0, target: 22 },
         ];
 
-        const nodes = skillData.map((skill, index, metric, rank) => ({ id: index, level: skill.level, metric: skill.metric, rank: skill.rank }));
+        const nodes = skillData.map((d, i) => ({ 
+            id: i, 
+            level: d.level, 
+            metric: d.metric, 
+            rank: d.rank, 
+            experience: d.experience,
+            imagePath: d.imagePath 
+        }));
 
         const links = attackLinks
 
@@ -49,25 +72,53 @@
 
         const simulation = d3.forceSimulation(nodes)
             .force('link', d3.forceLink(links).id(d => d.id).distance(100))
-            .force("charge", d3.forceManyBody().strength(-30))
+            .force("charge", d3.forceManyBody().strength(-70))
             .force("center", d3.forceCenter(300, 200));
 
         const svg = d3.select("svg");
 
+        svg.selectAll('*').remove();
+
         const link = svg.selectAll("line")
             .data(links)
             .enter().append("line")
-            .attr('stroke', 'white');
+            .attr('stroke', '#FFF2');
 
-        const node = svg.selectAll("circle")
+        const node = svg.selectAll("g")
             .data(nodes)
-            .enter().append("circle")
-            .attr('r', (d) => d.level * .3)
-            .attr('fill', 'red')
+            .enter().append("g")
             .call(d3.drag()
                 .on("start", (event, d) => dragstarted(event, d))
                 .on("drag", (event, d) => dragged(event, d))
-                .on("end", (event, d) => dragended(event, d)));
+                .on("end", (event, d) => dragended(event, d))
+            )
+
+        node.append("circle")
+            .attr('r', (d) => d.experience * .000003)
+            .attr('fill', 'red')
+            .on("mouseover", function (event, d) {
+                d3.select(this.parentNode).select('text')
+                    .style("fill", "white")
+                    .style('text-shadow', '.1em .1em .1em #000')
+            })
+            .on("mouseout", function (event, d) {
+                d3.select(this.parentNode).select('text')
+                    .style("fill", "#FFF1")
+                    .style('text-shadow', 'none')
+            });;
+
+        node.append("image")
+            .attr('xlink:href', d => d.imagePath)
+            .attr('x', d => -0.5 * d.experience * 0.000003) // Adjust the x-coordinate based on the circle's radius
+            .attr('y', d => -0.5 * d.experience * 0.000003) // Adjust the y-coordinate based on the circle's radius
+            .attr('width', d => d.experience * 0.000006) // Set the width based on the circle's radius
+            .attr('height', d => d.experience * 0.000006); // Set the height based on the circle's radius
+
+        node.append('text')
+            .text(d => d.metric)
+            .attr('dy', d => d.experience * 0.000003 + 15)
+            .attr('text-anchor', 'middle')
+            .attr('fill', '#FFF1')
 
         simulation.on("tick", function () {
             link.attr("x1", d => d.source.x)
@@ -77,6 +128,8 @@
 
             node.attr("cx", d => d.x)
                 .attr("cy", d => d.y);
+
+            node.attr("transform", d => `translate(${d.x},${d.y})`);
         });
 
         function dragstarted(event, d) {
@@ -97,74 +150,6 @@
         };
 
         simulation.restart();
-
-        // const width = 500, height = 500;
-        // const svg = d3.select('#bubbleChart')
-
-        // const links = [
-        //         {source: '0', target: '18'},
-        //         {source: '1', target: '18'},
-        //         {source: '2', target: '18'},
-        //         {source: '3', target: '1'},
-        //         {source: '4', target: '1'},
-        //         {source: '5', target: '1'},
-        //         {source: '6', target: '1'},
-        //         {source: '7', target: '1'},
-        //         {source: '8', target: '1'},
-        //         {source: '9', target: '1'},
-        //         {source: '10', target: '1'},
-        //         {source: '11', target: '1'},
-        //         {source: '12', target: '1'},
-        //         {source: '13', target: '1'},
-        //         {source: '14', target: '1'},
-        //         {source: '15', target: '1'},
-        //         {source: '16', target: '1'},
-        //         {source: '17', target: '1'},
-        //         {source: '18', target: '1'},
-        //         {source: '19', target: '1'},
-        //         {source: '20', target: '1'},
-        //         {source: '21', target: '1'},
-        //         {source: '22', target: '1'}
-        //     ]
-        
-        // const node = svg
-        //     .append('g')
-        //     .selectAll('circle')
-        //     .data(skillData)
-        //     .enter()
-        //     .append('circle')
-
-        // const link = svg
-        //     .append('g')
-        //     .selectAll('line')
-        //     .data(chart.links)
-        //     .enter()
-        //     .append('line')
-        //     .attr('stroke-width', function(d) {
-        //         return 3;
-        //     })
-        //     .style('stroke', 'pink')
-
-        // const simulation = d3.forceSimulation(skillData)
-        //     .force('charge', d3.forceManyBody().strength(-10))
-        //     .force('center', d3.forceCenter(width / 2, height / 2))
-        //     .on('tick', ticked);
-
-        // function ticked() {
-        //     node
-        //         .join('circle')
-        //         .attr('r', function(d) { 
-        //             return .3 * d.level; 
-        //         })
-        //         .attr('cx', function(d) {
-        //             return d.x
-        //         })
-        //         .attr('cy', function(d) {
-        //             return d.y
-        //         })
-        //         .attr('fill', '#0005')
-        //         .attr('stroke', 'grey')
-        // };
     };
   </script>
 
