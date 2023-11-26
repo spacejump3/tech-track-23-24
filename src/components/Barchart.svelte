@@ -22,7 +22,7 @@
       skillData = skillData.map((d, i) => ({
         ...d,
         imagePath: `/src/img/${i}.png`
-      }))
+      }));
 
       console.log(skillData);
 
@@ -119,11 +119,11 @@
 
         const sqrtScale = d3.scaleSqrt()
             .domain([0, d3.max(nodes, (d) => d.experience)])
-            .range([5, 100])
+            .range([5, 100]);
 
         const rankCol = d3.scaleLinear()
             .domain([0, d3.max(nodes, (d) => d.rank)])
-            .range(['#7fde50', '#802c22'])
+            .range(['#7fde50', '#802c22']);
 
         node.append("circle")
             .attr('r', (d) => sqrtScale(d.experience))
