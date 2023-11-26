@@ -1,6 +1,5 @@
 <script>
     import * as d3 from 'd3';
-    import { onMount } from 'svelte';
     
     let formData = { name: 'gloopt' };
 
@@ -32,7 +31,7 @@
 
     // D3 charts
     function generateChart(skillData) {
-        const attackLinks = [
+        const links = [
             { source: 18, target: 20 },
             { source: 18, target: 1 },
             { source: 18, target: 5 },
@@ -77,14 +76,12 @@
             imagePath: d.imagePath 
         }));
 
-        const links = attackLinks;
-
         console.log(nodes);
 
         const simulation = d3.forceSimulation(nodes)
-            .force('link', d3.forceLink(links).id(d => d.id).distance(100))
-            .force("charge", d3.forceManyBody().strength(-70))
-            .force("center", d3.forceCenter(500, 300));
+            .force('link', d3.forceLink(links).id(d => d.id).distance(150))
+            .force("charge", d3.forceManyBody().strength(-170))
+            .force("center", d3.forceCenter(500, 500));
 
         const svg = d3.select("svg");
 
@@ -93,16 +90,16 @@
         const link = svg.selectAll("line")
             .data(links)
             .enter().append("line")
-            .attr('stroke', 'grey')
+            .attr('stroke', '#FFF2')
             .attr('stroke-width', 2)
             .attr('marker-end', 'url(#end)');
 
         svg.append("defs").selectAll("marker")
             .data(["end"])
             .enter().append("marker")
-            .attr("id", d => d)
+            .attr("id", (d) => d)
             .attr("viewBox", "0 -5 10 10")
-            .attr("refX", 25)  // Controls the distance from the end of the line to the arrowhead
+            .attr("refX", 50)  // Controls the distance from the end of the line to the arrowhead
             .attr("refY", 0)   // Controls the vertical offset
             .attr("markerWidth", 6)
             .attr("markerHeight", 6)
@@ -120,36 +117,88 @@
                 .on("end", (event, d) => dragended(event, d))
             );
 
-        node.append("circle")
-            .attr('r', (d) => d.experience * .000003)
-            .attr('fill', 'lightgrey')
-            .attr('stroke', 'grey')
-            .attr('stroke-width', 2);
+        const sqrtScale = d3.scaleSqrt()
+            .domain([0, d3.max(nodes, (d) => d.experience)])
+            .range([5, 100])
 
-        node.append("image")
-            .attr('xlink:href', d => d.imagePath)
-            .attr('x', d => -.66 * d.experience * 0.000003) // Adjust the x-coordinate based on the circle's radius
-            .attr('y', d => -.66 * d.experience * 0.000003) // Adjust the y-coordinate based on the circle's radius
-            .attr('width', d => d.experience * 0.000004) // Set the width based on the circle's radius
-            .attr('height', d => d.experience * 0.000004) // Set the height based on the circle's radius
-            .style('image-rendering', 'crisp-edges')
-            .style('filter', 'drop-shadow(0px 0px 2px white)')
-            .on("mouseover", function (event, d) {
-                d3.select(this.parentNode).select('text')
+        const rankCol = d3.scaleLinear()
+            .domain([0, d3.max(nodes, (d) => d.rank)])
+            .range(['#7fde50', '#802c22'])
+
+        node.append("circle")
+            .attr('r', (d) => sqrtScale(d.experience))
+            .attr('fill', (d) => rankCol(d.rank))
+            .attr('visibility', 'visible')
+            .on("mouseover", function() {
+                d3.select(this.parentNode).selectAll('text').attr('visibility', 'visible')
                     .style("fill", "white")
                     .style('text-shadow', '.1em .1em .1em #000')
+
+                d3.select(this)
+                    .style('stroke', 'white')
+                    .style('stroke-width', 2)
             })
-            .on("mouseout", function (event, d) {
-                d3.select(this.parentNode).select('text')
+            .on("mouseout", function() {
+                d3.select(this.parentNode).selectAll('text').attr('visibility', 'hidden')
                     .style("fill", "#FFF1")
                     .style('text-shadow', 'none')
+
+                d3.select(this)
+                    .style('stroke', 'none')
+            });
+
+        node.append("image")
+            .attr('xlink:href', (d) => d.imagePath)
+            .attr('x', (d) => -sqrtScale(d.experience) / 2)
+            .attr('y', (d) => -sqrtScale(d.experience) / 2)
+            .attr('width', (d) => sqrtScale(d.experience))
+            .attr('height', (d) => sqrtScale(d.experience))
+            .style('image-rendering', 'crisp-edges')
+            .style('filter', function(d) {
+                if(d.level >= 99) {
+                    return 'drop-shadow(0px 0px 1px yellow) drop-shadow(0px 0px 1px yellow) drop-shadow(0px 0px 1px yellow) drop-shadow(0px 0px 1px yellow)'
+                } else {
+                    return 'none'
+                }
+            })
+            .on("mouseover", function() {
+                d3.select(this.parentNode).selectAll('text').attr('visibility', 'visible')
+                    .style("fill", "white")
+                    .style('text-shadow', '.1em .1em .1em #000')
+
+                d3.select(this.parentNode).select('circle')
+                    .style('stroke', 'white')
+                    .style('stroke-width', 2)
+            })
+            .on("mouseout", function() {
+                d3.select(this.parentNode).selectAll('text').attr('visibility', 'hidden')
+                    .style("fill", "#FFF1")
+                    .style('text-shadow', 'none')
+
+                d3.select(this.parentNode).select('circle')
+                    .style('stroke', 'none')
             });
 
         node.append('text')
-            .text(d => d.metric)
-            .attr('dy', d => d.experience * 0.000003 + 15)
+            .text((d) => `Skill: ${d.metric}`)
+            .attr('dy', (d) => sqrtScale(d.experience) + 15)
             .attr('text-anchor', 'middle')
-            .attr('fill', '#FFF1');
+            .attr('fill', '#FFF1')
+            .attr('visibility', 'hidden');
+
+        node.append('text')
+            .text((d) => `Level: ${d.level}`)
+            .attr('dy', (d) => sqrtScale(d.experience) + 30)
+            .attr('text-anchor', 'middle')
+            .attr('fill', '#FFF1')
+            .attr('visibility', 'hidden');
+
+        node.append('text')
+            .text((d) => `Rank: ${d.rank}`)
+            .attr('dy', (d) => sqrtScale(d.experience) + 45)
+            .attr('text-anchor', 'middle')
+            .attr('fill', '#FFF1')
+            .attr('visibility', 'hidden');
 
         simulation.on("tick", function () {
             link.attr("x1", d => d.source.x)
@@ -192,7 +241,7 @@
     </form>
 </div>
 
-<svg id='bubbleChart' width='1000' height='1000'></svg>
+<svg id='bubbleChart' width='1500' height='1200'></svg>
 
 <style>
     form {
@@ -229,13 +278,13 @@
         color: white;
         font-weight: 600;
 
-        background: #3A961A;
+        background: #50962d;
         border: none;
         border-radius: .1em;
     }
 
     form button:hover {
-        background: #53bf30;
+        background: #7fde50;
         cursor: pointer;
     }
 </style>
