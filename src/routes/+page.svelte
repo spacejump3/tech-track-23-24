@@ -1,11 +1,9 @@
 <script>
-    import TestComponent from '../components/TestComponent.svelte';
-    import Barchart from '../components/Barchart.svelte';
+    import Networkgraph from '../components/Networkgraph.svelte';
 </script>
 
 <body>
-    <Barchart />
-    <!-- <TestComponent /> -->
+    <Networkgraph />
 </body>
 
 <style>

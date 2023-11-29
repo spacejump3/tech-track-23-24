@@ -29,7 +29,7 @@
         generateChart(skillData);
     }
 
-    // D3 charts
+    // Node links
     function generateChart(skillData) {
         const links = [
             { source: 18, target: 20 },
@@ -67,6 +67,7 @@
             { source: 19, target: 21 },
         ];
 
+        // Adding id's and images
         const nodes = skillData.map((d, i) => ({
             id: i,
             level: d.level,
@@ -92,8 +93,10 @@
 
         const svg = d3.select('svg');
 
+        // remove svg if new chart is generated
         svg.selectAll('*').remove();
 
+        // link styling
         const link = svg
             .selectAll('line')
             .data(links)
@@ -103,6 +106,7 @@
             .attr('stroke-width', 2)
             .attr('marker-end', 'url(#end)');
 
+        // adding arrows
         svg.append('defs')
             .selectAll('marker')
             .data(['end'])
