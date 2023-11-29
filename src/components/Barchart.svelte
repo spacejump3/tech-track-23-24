@@ -20,7 +20,7 @@
         // add imagePath to each node
         skillData = skillData.map((d, i) => ({
             ...d,
-            imagePath: `/src/img/${i}.png`,
+            imagePath: `/img/${i}.png`,
         }));
 
         console.log(skillData);
