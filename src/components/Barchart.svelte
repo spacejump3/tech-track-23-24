@@ -1,6 +1,7 @@
 <script>
     import * as d3 from 'd3';
-    let formData = { name: 'gloopt' };
+
+    let formData = { name: '' };
 
     // Fetch API data
     async function getData(name) {
@@ -266,6 +267,14 @@
             id="name"
             bind:value={formData.name}
         />
+
+        <select bind:value={formData.name} for="name" name="names" id="">
+            <option value="">Or select one of these names</option>
+            <option value="gloopt">gloopt</option>
+            <option value="fatpear 7">fatpear 7</option>
+            <option value="lynx titan">lynx titan</option>
+            <option value="b0aty">b0aty</option>
+        </select>
         <button type="submit">Submit</button>
     </form>
 </div>
@@ -297,8 +306,30 @@
         border-radius: 0.1em;
     }
 
+    form input::placeholder {
+        opacity: 1;
+        color: #FFF5;
+    }
+
     form input:focus {
         outline: solid #554844 1px;
+    }
+
+    form select {
+        height: 3em;
+        margin: 1em 0 0 0;
+        padding: 0 1em 0 1em;
+
+        background: #1e0f0f;
+        color: #FFF5;
+        border: none;
+        border-radius: 0.1em;
+
+        cursor: pointer;
+    }
+
+    form select:hover {
+        color: white;
     }
 
     form button {
