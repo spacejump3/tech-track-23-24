@@ -1,7 +1,7 @@
 <script>
     import * as d3 from 'd3';
 
-    let formData = { name: '' };
+    const formData = { name: '' };
 
     // Fetch API data
     async function getData(name) {
@@ -23,8 +23,6 @@
             ...d,
             imagePath: `/img/${i}.png`,
         }));
-
-        console.log(skillData);
 
         generateChart(skillData);
     }
@@ -123,6 +121,16 @@
             .append('path')
             .attr('d', 'M0,-5L10,0L0,5');
 
+        const sqrtScale = d3
+            .scaleSqrt()
+            .domain([0, d3.max(nodes, (d) => d.experience)])
+            .range([5, 100]);
+
+        const rankCol = d3
+            .scaleLinear()
+            .domain([0, d3.max(nodes, (d) => d.rank)])
+            .range(['#7fde50', '#802c22']);
+
         const node = svg
             .selectAll('g')
             .data(nodes)
@@ -135,16 +143,6 @@
                     .on('drag', (event, d) => dragged(event, d))
                     .on('end', (event, d) => dragended(event, d))
             );
-
-        const sqrtScale = d3
-            .scaleSqrt()
-            .domain([0, d3.max(nodes, (d) => d.experience)])
-            .range([5, 100]);
-
-        const rankCol = d3
-            .scaleLinear()
-            .domain([0, d3.max(nodes, (d) => d.rank)])
-            .range(['#7fde50', '#802c22']);
 
         node.append('circle')
             .attr('r', (d) => sqrtScale(d.experience))
@@ -230,6 +228,13 @@
             .attr('fill', '#FFF1')
             .attr('visibility', 'hidden');
 
+        node.append('text')
+            .text((d) => `Exp: ${d.experience}`)
+            .attr('dy', (d) => sqrtScale(d.experience) + 60)
+            .attr('text-anchor', 'middle')
+            .attr('fill', '#FFF1')
+            .attr('visibility', 'hidden');
+
         simulation.on('tick', function () {
             link.attr('x1', (d) => d.source.x)
                 .attr('y1', (d) => d.source.y)
@@ -257,8 +262,6 @@
             d.fx = null;
             d.fy = null;
         }
-
-        simulation.restart();
     }
 </script>
 
@@ -283,7 +286,7 @@
     </form>
 </div>
 
-<svg id="bubbleChart" width="1500" height="1200" />
+<svg width="1500" height="1200"></svg>
 
 <style>
     form {
@@ -312,7 +315,7 @@
 
     form input::placeholder {
         opacity: 1;
-        color: #FFF5;
+        color: #fff5;
     }
 
     form input:focus {
@@ -325,7 +328,7 @@
         padding: 0 1em 0 1em;
 
         background: #1e0f0f;
-        color: #FFF5;
+        color: #fff5;
         border: none;
         border-radius: 0.1em;
 
