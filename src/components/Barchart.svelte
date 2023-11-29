@@ -1,6 +1,5 @@
 <script>
     import * as d3 from 'd3';
-
     let formData = { name: 'gloopt' };
 
     // Fetch API data
@@ -29,7 +28,7 @@
         generateChart(skillData);
     }
 
-    // D3 barchart
+    // D3 charts
     function generateChart(skillData) {
         const links = [
             { source: 18, target: 20 },
@@ -314,7 +313,7 @@
     }
 
     form button:hover {
-        background: #53bf30;
+        background: #7fde50;
         cursor: pointer;
     }
 </style>
